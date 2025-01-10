@@ -1,5 +1,8 @@
 # 基于openmatrix的矩阵可视化操作
 
+# 软件界面
+![操作界面](img/omx_viewer.JPG)
+
 
 ## 基本功能
 - 1、读取OMX矩阵，并可视化；

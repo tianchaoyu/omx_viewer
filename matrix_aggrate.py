@@ -8,7 +8,7 @@ from PyQt5.QtWidgets import QFileDialog,QTextEdit,QApplication, QMainWindow,QDia
 from PyQt5 import QtCore, QtGui, QtWidgets
 import os
 import pandas as pd
-from table_view import TableShow
+from omx_operate.table_view import TableShow
 import numpy as np
 
 class Ui_Aggrate_Dialog(QDialog):

@@ -5,14 +5,17 @@
 # @Author  : lhy
 # @Software: PyCharm
 
-from PyQt5.QtWidgets import QFileDialog,QTextEdit,QApplication, QMainWindow,QDialog
+from PyQt5.QtWidgets import QFileDialog,QTextEdit,QApplication, QMainWindow,QDialog,QMenu,QAction
 from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5.QtCore import Qt
 import sys
 import openmatrix as omx
 from PyQt5.QtGui import QStandardItemModel,QStandardItem
 import os
-from pyqt_tabel_matrix import MatrixModel
-from matrix_aggrate import Ui_Aggrate_Dialog
+
+from omx_operate.pyqt_tabel_matrix import MatrixModel
+from omx_operate.matrix_aggrate import Ui_Aggrate_Dialog
+import pandas as pd
 
 class Ui_OmxViewer(QMainWindow):
 
@@ -171,10 +174,16 @@ class Ui_OmxViewer(QMainWindow):
         self.menubar.addAction(self.menufind.menuAction())
         self.menubar.addAction(self.menuhelp.menuAction())
 
+        self.status_bar = self.statusBar()
+        self.status_bar.showMessage("welcome to use it by lhy!")
+
         self.retranslateUi()
         QtCore.QMetaObject.connectSlotsByName(self)
         # 槽函数激活
         self.signal_slots_connection()
+        self.treeView.setContextMenuPolicy(Qt.CustomContextMenu)
+        self.treeView.customContextMenuRequested.connect(self.showContextMenu)
+        self.actionsingle_value.triggered.connect(self.search_value_show)
 
     def retranslateUi(self):
         _translate = QtCore.QCoreApplication.translate
@@ -237,6 +246,43 @@ class Ui_OmxViewer(QMainWindow):
         # 矩阵聚合
         self.actionAggrate.triggered.connect(self.matrix_aggrate)
 
+    def showContextMenu(self,pos):
+        menu = QMenu(self)
+        action1_export = QAction("export csv", self)
+        action2_addmap = QAction("add map", self)
+        menu.addAction(action1_export)
+        menu.addAction(action2_addmap)
+
+        # 连接菜单项的触发信号到处理函数
+        action1_export.triggered.connect(lambda:self.onAction1Clicked_export(pos))
+        action2_addmap.triggered.connect(lambda:self.onAction1Clicked_addmap(pos))
+
+        # 获取当前点击的索引
+        # pos = event  # 获取鼠标位置
+        # index = self.treeView.indexAt(pos)
+        # if index.isValid():
+        #     # 可以在这里根据索引进行一些操作
+        #     print(f"右键点击了: {index.data()}")
+
+        # 显示菜单
+        menu.exec(self.treeView.mapToGlobal(pos))
+
+    def onAction1Clicked_export(self, pos):
+        # print("菜单项1被点击")
+        index = self.treeView.indexAt(pos)
+        if index.isValid():
+            # 可以在这里根据索引进行一些操作
+            kay_name = index.data()
+            print(kay_name)
+            matrix_data = self.omx_file[kay_name][:,:]
+            index = [x for x in range(len(matrix_data[0]))]
+            df_matrix = pd.DataFrame(matrix_data,columns=index,index=index)
+            destpath,filetype = QFileDialog.getSaveFileName(self,"文件保存",kay_name+".csv","CSV Files (*.csv)")
+            # print(destpath)
+            df_matrix.to_csv(destpath, index=True)
+
+    def onAction2Clicked(self):
+        print("菜单项2被点击")
 
     def updata_tree_view(self,file_name_without_extension):
         self.model.clear()
@@ -302,6 +348,11 @@ class Ui_OmxViewer(QMainWindow):
         """
         self._dialog = Ui_Aggrate_Dialog(self.matrix_data)
         self._dialog.show()
+
+    def search_value_show(self):
+        """值的搜索"""
+        pass
+
 
 
 
